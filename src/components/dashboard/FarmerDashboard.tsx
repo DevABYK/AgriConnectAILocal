@@ -1,8 +1,53 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, TrendingUp, Package, DollarSign } from "lucide-react";
+import { cropAPI, Crop } from "@/lib/api";
+import { AddCropForm } from "@/components/crops/AddCropForm";
+import { CropCard } from "@/components/crops/CropCard";
 
 const FarmerDashboard = () => {
+  const [crops, setCrops] = useState<Crop[]>([]);
+  const [isAddCropOpen, setIsAddCropOpen] = useState(false);
+  const [editingCrop, setEditingCrop] = useState<Crop | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchCrops = async () => {
+    try {
+      const userStr = localStorage.getItem('currentUser');
+      if (!userStr) {
+        setIsLoading(false);
+        return;
+      }
+
+      const currentUser = JSON.parse(userStr);
+      const userCrops = await cropAPI.getAll(currentUser.id);
+      setCrops(userCrops);
+    } catch (error) {
+      console.error('Error fetching crops:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCrops();
+  }, []);
+
+  const handleCropAdded = () => {
+    fetchCrops(); // Refresh the crops list
+    setEditingCrop(null);
+  };
+
+  const handleEditCrop = (crop: Crop) => {
+    setEditingCrop(crop);
+    setIsAddCropOpen(true);
+  };
+
+  const handleDeleteCrop = (cropId: string) => {
+    setCrops(prev => prev.filter(crop => crop.id !== cropId));
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -17,7 +62,7 @@ const FarmerDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Listings</p>
-                <p className="text-2xl font-bold">0</p>
+                <p className="text-2xl font-bold">{crops.length}</p>
               </div>
               <Package className="h-8 w-8 text-primary" />
             </div>
@@ -70,17 +115,40 @@ const FarmerDashboard = () => {
                 <CardTitle>My Crop Listings</CardTitle>
                 <CardDescription>Manage your available crops</CardDescription>
               </div>
-              <Button className="bg-gradient-to-r from-primary to-primary/80">
+              <Button
+                className="bg-gradient-to-r from-primary to-primary/80"
+                onClick={() => {
+                  setEditingCrop(null);
+                  setIsAddCropOpen(true);
+                }}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Crop
               </Button>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-12 text-muted-foreground">
-              <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No crops listed yet. Add your first crop to get started!</p>
-            </div>
+            {isLoading ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Loading crops...</p>
+              </div>
+            ) : crops.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No crops listed yet. Add your first crop to get started!</p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {crops.map((crop) => (
+                  <CropCard
+                    key={crop.id}
+                    crop={crop}
+                    onEdit={handleEditCrop}
+                    onDelete={handleDeleteCrop}
+                  />
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -130,6 +198,14 @@ const FarmerDashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Add/Edit Crop Modal */}
+      <AddCropForm
+        open={isAddCropOpen}
+        onOpenChange={setIsAddCropOpen}
+        onSuccess={handleCropAdded}
+        editCrop={editingCrop}
+      />
     </div>
   );
 };

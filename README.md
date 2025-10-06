@@ -1,73 +1,126 @@
-# Welcome to your Lovable project
+# AgriConnect2 - Farm Link Intelligence
 
-## Project info
+A comprehensive web application connecting farmers and buyers in Kenya, featuring crop listings with photos, real-time messaging, AI-powered agricultural planning, and integrated payment systems.
 
-**URL**: https://lovable.dev/projects/74023021-ed20-44ab-b8f2-7eaac9cea8fa
+## Features
 
-## How can I edit this code?
+- **Farmer Dashboard**: Crop listing management with photo uploads
+- **Buyer Platform**: Browse crops by location, price, and quality
+- **Smart Matching**: Location-based farmer-buyer pairing
+- **Real-time Chat**: Communication between farmers and buyers
+- **AgroPlan AI**: AI-powered soil and crop planning assistant
+- **Local Storage**: SQLite database with local file storage for images
 
-There are several ways of editing your application.
+## Technologies Used
 
-**Use Lovable**
+- **Frontend**: React, TypeScript, Vite
+- **UI Framework**: shadcn/ui, Tailwind CSS
+- **Database**: SQLite (better-sqlite3)
+- **Authentication**: Custom auth with bcrypt password hashing
+- **File Storage**: Local file system for crop images
+- **State Management**: React hooks
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/74023021-ed20-44ab-b8f2-7eaac9cea8fa) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js (v16 or higher)
+- npm or yarn
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. **Clone the repository**
+   ```bash
+   git clone <YOUR_GIT_URL>
+   cd farm-link-intelligence
+   ```
 
-Follow these steps:
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+3. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+4. **Open your browser**
+   Navigate to `http://localhost:8080`
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Database Setup
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+The application uses SQLite for data persistence. The database file (`data/app.db`) and image uploads directory (`public/uploads/crops/`) are created automatically when you first run the application.
+
+### User Accounts
+
+You can create accounts as either a farmer or buyer:
+- **Farmers**: Can list crops for sale with photos
+- **Buyers**: Can browse and purchase crops
+
+## Project Structure
+
+```
+src/
+├── components/
+│   ├── auth/           # Authentication components
+│   ├── crops/          # Crop listing components
+│   ├── dashboard/      # Dashboard components
+│   └── ui/             # Reusable UI components
+├── lib/
+│   ├── database.ts     # SQLite database setup
+│   ├── dbService.ts    # Database operations
+│   └── imageUtils.ts   # Image upload utilities
+├── pages/              # Page components
+└── data/               # SQLite database file (created automatically)
+public/uploads/crops/   # Crop images (created automatically)
 ```
 
-**Edit a file directly in GitHub**
+## Key Features Implementation
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Crop Listings with Photos
+- Farmers can upload crop photos (JPEG, PNG, GIF, WebP)
+- Images are stored locally in `public/uploads/crops/`
+- Automatic image validation and resizing
+- CRUD operations for crop management
 
-**Use GitHub Codespaces**
+### Authentication System
+- User registration and login
+- Password hashing with bcrypt
+- Session management via localStorage
+- Role-based access (farmer/buyer)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Database Schema
+- **Users**: Authentication and profile data
+- **Crops**: Crop listings with farmer references
+- **Messages**: Chat functionality
+- **Orders**: Purchase transactions
+- **AgroPlan Data**: AI planning data
 
-## What technologies are used for this project?
+## Development
 
-This project is built with:
+### Available Scripts
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-## How can I deploy this project?
+### Adding New Features
 
-Simply open [Lovable](https://lovable.dev/projects/74023021-ed20-44ab-b8f2-7eaac9cea8fa) and click on Share -> Publish.
+1. Update the database schema in `src/lib/database.ts`
+2. Add new service methods in `src/lib/dbService.ts`
+3. Create UI components in the appropriate directory
+4. Update routing in `src/App.tsx` if needed
 
-## Can I connect a custom domain to my Lovable project?
+## Contributing
 
-Yes, you can!
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## License
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+This project is licensed under the MIT License.

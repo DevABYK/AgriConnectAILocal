@@ -1,26 +1,17 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sprout, LogOut, Brain, MessageSquare } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 
 interface DashboardNavProps {
   userType: "farmer" | "buyer";
+  onLogout: () => void;
 }
 
-const DashboardNav = ({ userType }: DashboardNavProps) => {
-  const navigate = useNavigate();
-
-  const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast.success("Signed out successfully");
-      navigate("/");
-    } catch (error) {
-      console.error("Sign out error:", error);
-      toast.error("Failed to sign out");
-    }
+const DashboardNav = ({ userType, onLogout }: DashboardNavProps) => {
+  const handleSignOut = () => {
+    onLogout();
+    toast.success("Signed out successfully");
   };
 
   return (

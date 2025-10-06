@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { User } from "@supabase/supabase-js";
+import { User } from "@/lib/api";
 import FarmerDashboard from "@/components/dashboard/FarmerDashboard";
 import BuyerDashboard from "@/components/dashboard/BuyerDashboard";
 import DashboardNav from "@/components/dashboard/DashboardNav";
@@ -9,31 +8,23 @@ import DashboardNav from "@/components/dashboard/DashboardNav";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
-  const [userType, setUserType] = useState<"farmer" | "buyer">("farmer");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/auth");
-      } else {
-        setUser(session.user);
-        setUserType(session.user.user_metadata?.user_type || "farmer");
-        setIsLoading(false);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
-        navigate("/auth");
-      } else {
-        setUser(session.user);
-        setUserType(session.user.user_metadata?.user_type || "farmer");
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    // Check if user is logged in
+    const userStr = localStorage.getItem('currentUser');
+    if (!userStr) {
+      navigate("/auth");
+    } else {
+      setUser(JSON.parse(userStr));
+      setIsLoading(false);
+    }
   }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('currentUser');
+    navigate("/auth");
+  };
 
   if (isLoading) {
     return (
@@ -46,10 +37,14 @@ const Dashboard = () => {
     );
   }
 
+  if (!user) {
+    return null; // Will redirect to auth
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      <DashboardNav userType={userType} />
-      {userType === "farmer" ? <FarmerDashboard /> : <BuyerDashboard />}
+      <DashboardNav userType={user.user_type} onLogout={handleLogout} />
+      {user.user_type === "farmer" ? <FarmerDashboard /> : <BuyerDashboard />}
     </div>
   );
 };
