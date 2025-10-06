@@ -19,108 +19,48 @@ A comprehensive web application connecting farmers and buyers in Kenya, featurin
 - **Authentication**: Custom auth with bcrypt password hashing
 - **File Storage**: Local file system for crop images
 - **State Management**: React hooks
+```markdown
+# AgriConnect2 — Farm Link Intelligence
 
-## Getting Started
+A modern web platform connecting farmers and buyers. AgriConnect2 provides crop listings with photos, role-based dashboards (farmer & buyer), real-time chat, and an AI-powered AgroPlan assistant to help with crop planning.
 
-### Prerequisites
+Status: Work in progress — actively developed
 
-- Node.js (v16 or higher)
-- npm or yarn
+Key features
+- Crop listings with image uploads
+- Farmer and buyer dashboards
+- Real-time messaging
+- AgroPlan: AI-driven crop and soil guidance
+- Local SQLite storage with simple file-based image uploads
 
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <YOUR_GIT_URL>
-   cd farm-link-intelligence
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-4. **Open your browser**
-   Navigate to `http://localhost:8080`
-
-### Database Setup
-
-The application uses SQLite for data persistence. The database file (`data/app.db`) and image uploads directory (`public/uploads/crops/`) are created automatically when you first run the application.
-
-### User Accounts
-
-You can create accounts as either a farmer or buyer:
-- **Farmers**: Can list crops for sale with photos
-- **Buyers**: Can browse and purchase crops
-
-## Project Structure
-
+Quick start
+1. Install dependencies
+```powershell
+npm install
 ```
-src/
-├── components/
+2. Run the dev server
+```powershell
+npm run dev
+```
+3. Open http://localhost:5173 (or the URL shown by the dev server)
+
+Notes
+- The project uses Vite + React + TypeScript and Tailwind (shadcn/ui components).
+- Database: SQLite (data/app.db). Uploads are stored in `public/uploads/crops/`.
+
+Project layout (important dirs)
+```
+src/                # React app (components, pages, hooks, UI)
+server/             # Minimal backend server (if used)
+public/uploads/     # Uploaded crop images
+data/               # SQLite database file
+```
+
+Contributing
+- Create a branch, add changes, and open a pull request.
+
+License
+- MIT
+
+``` 
 │   ├── auth/           # Authentication components
-│   ├── crops/          # Crop listing components
-│   ├── dashboard/      # Dashboard components
-│   └── ui/             # Reusable UI components
-├── lib/
-│   ├── database.ts     # SQLite database setup
-│   ├── dbService.ts    # Database operations
-│   └── imageUtils.ts   # Image upload utilities
-├── pages/              # Page components
-└── data/               # SQLite database file (created automatically)
-public/uploads/crops/   # Crop images (created automatically)
-```
-
-## Key Features Implementation
-
-### Crop Listings with Photos
-- Farmers can upload crop photos (JPEG, PNG, GIF, WebP)
-- Images are stored locally in `public/uploads/crops/`
-- Automatic image validation and resizing
-- CRUD operations for crop management
-
-### Authentication System
-- User registration and login
-- Password hashing with bcrypt
-- Session management via localStorage
-- Role-based access (farmer/buyer)
-
-### Database Schema
-- **Users**: Authentication and profile data
-- **Crops**: Crop listings with farmer references
-- **Messages**: Chat functionality
-- **Orders**: Purchase transactions
-- **AgroPlan Data**: AI planning data
-
-## Development
-
-### Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-
-### Adding New Features
-
-1. Update the database schema in `src/lib/database.ts`
-2. Add new service methods in `src/lib/dbService.ts`
-3. Create UI components in the appropriate directory
-4. Update routing in `src/App.tsx` if needed
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
