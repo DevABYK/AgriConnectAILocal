@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
   "playwright:test": "playwright test",
+  "e2e:integration": "pwsh ./scripts/run-e2e-integration.ps1",
     "server": "node server/index.js",
     "dev:all": "concurrently \"npm run server\" \"npm run dev\"",
     "build": "vite build",
