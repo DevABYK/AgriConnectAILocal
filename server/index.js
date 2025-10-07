@@ -29,6 +29,17 @@ if (!fs.existsSync(dbDir)) {
 
 const db = new Database(dbPath);
 
+// Ensure buyer_contact column exists in orders table (for older DBs)
+try {
+  const col = db.prepare("PRAGMA table_info(orders)").all().find(c => c.name === 'buyer_contact');
+  if (!col) {
+    db.prepare("ALTER TABLE orders ADD COLUMN buyer_contact TEXT").run();
+    console.log('Migrated: added orders.buyer_contact');
+  }
+} catch (err) {
+  // ignore migration errors
+}
+
 // Initialize database tables
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
@@ -83,6 +94,7 @@ db.exec(`
     buyer_id TEXT NOT NULL,
     quantity REAL NOT NULL,
     total_price REAL NOT NULL,
+    buyer_contact TEXT,
     status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'delivered', 'cancelled')),
     delivery_date TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -188,16 +200,44 @@ app.post('/api/auth/login', async (req, res) => {
 // Crop Routes
 app.get('/api/crops', (req, res) => {
   try {
-    const { farmerId } = req.query;
-    let crops;
-    
+    const { farmerId, q, status, page, limit } = req.query;
+
+    // Build WHERE clauses dynamically
+    const whereClauses = [];
+    const params = [];
+
     if (farmerId) {
-      crops = db.prepare('SELECT * FROM crops WHERE farmer_id = ? ORDER BY created_at DESC').all(farmerId);
-    } else {
-      crops = db.prepare('SELECT * FROM crops ORDER BY created_at DESC').all();
+      whereClauses.push('c.farmer_id = ?');
+      params.push(farmerId);
     }
-    
-    res.json(crops);
+
+    if (status) {
+      whereClauses.push('c.status = ?');
+      params.push(status);
+    }
+
+    if (q) {
+      whereClauses.push('(c.name LIKE ? OR c.description LIKE ? OR c.location LIKE ?)');
+      const pattern = `%${q}%`;
+      params.push(pattern, pattern, pattern);
+    }
+
+    const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+    // Pagination
+    const pageNum = parseInt(page) || 1;
+    const pageSize = Math.min(parseInt(limit) || 10, 100);
+    const offset = (pageNum - 1) * pageSize;
+
+    // Total count for pagination
+    const countStmt = db.prepare(`SELECT COUNT(*) as count FROM crops c ${whereSql}`);
+    const total = countStmt.get(...params).count;
+
+    // Select crops and include farmer's full_name
+    const sql = `SELECT c.*, u.full_name as farmer_name FROM crops c LEFT JOIN users u ON c.farmer_id = u.id ${whereSql} ORDER BY c.created_at DESC LIMIT ? OFFSET ?`;
+    const crops = db.prepare(sql).all(...params, pageSize, offset);
+
+    res.json({ crops, total });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -299,6 +339,52 @@ app.get('/api/users/:id', (req, res) => {
     }
     
     res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Orders Routes
+// Create orders - accepts an array of items { crop_id, quantity } and buyer_id, buyer_contact
+app.post('/api/orders', (req, res) => {
+  try {
+    const { buyer_id, buyer_contact, items } = req.body; // items: [{ crop_id, quantity }]
+    if (!buyer_id || !items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'Invalid order payload' });
+    }
+
+    const created = [];
+    const insertStmt = db.prepare(`INSERT INTO orders (id, crop_id, buyer_id, quantity, total_price, buyer_contact, status) VALUES (?, ?, ?, ?, ?, ?, ?)`);
+
+    for (const it of items) {
+      const crop = db.prepare('SELECT * FROM crops WHERE id = ?').get(it.crop_id);
+      if (!crop) return res.status(404).json({ error: `Crop not found: ${it.crop_id}` });
+      const qty = parseFloat(it.quantity) || 0;
+      const total = qty * crop.price_per_unit;
+      const orderId = uuidv4();
+      insertStmt.run(orderId, it.crop_id, buyer_id, qty, total, buyer_contact || null, 'pending');
+      const o = db.prepare('SELECT * FROM orders WHERE id = ?').get(orderId);
+      created.push(o);
+    }
+
+    res.json({ created });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// List orders. Optional query: farmerId to get orders for crops belonging to a farmer
+app.get('/api/orders', (req, res) => {
+  try {
+    const { farmerId } = req.query;
+    let orders;
+    if (farmerId) {
+      // Join orders -> crops to filter by farmer
+      orders = db.prepare(`SELECT o.*, c.farmer_id, c.name as crop_name, c.image_url, u.full_name as buyer_name FROM orders o JOIN crops c ON o.crop_id = c.id LEFT JOIN users u ON o.buyer_id = u.id WHERE c.farmer_id = ? ORDER BY o.created_at DESC`).all(farmerId);
+    } else {
+      orders = db.prepare(`SELECT o.*, c.name as crop_name, c.image_url, u.full_name as buyer_name FROM orders o LEFT JOIN crops c ON o.crop_id = c.id LEFT JOIN users u ON o.buyer_id = u.id ORDER BY o.created_at DESC`).all();
+    }
+    res.json(orders);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

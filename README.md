@@ -62,5 +62,29 @@ Contributing
 License
 - MIT
 
+Running tests
+------------
+
+This project includes a Playwright end-to-end test that verifies the add-to-cart → place-order UI flow. The test is mocked and does not require the local backend to be running.
+
+1. Install dependencies and Playwright browsers:
+
+```powershell
+npm install
+npx playwright install
+```
+
+2. Run the Playwright tests:
+
+```powershell
+npx playwright test
+# or
+npm run playwright:test
+```
+
+Notes:
+- The Playwright test mocks `GET /api/crops` and `POST /api/orders` via request interception so it runs reliably without a backend.
+- If you prefer a full integration test against the real backend, the test file can be switched to seed the API and wait for a readiness check — I can add this variant if you want.
+
 ``` 
 │   ├── auth/           # Authentication components

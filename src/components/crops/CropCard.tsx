@@ -16,6 +16,7 @@ import {
 import { Edit, Trash2, MapPin, Calendar, Package } from "lucide-react";
 import { cropAPI, Crop } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useCart } from '@/contexts/CartContext';
 
 interface CropCardProps {
   crop: Crop;
@@ -26,6 +27,22 @@ interface CropCardProps {
 export const CropCard = ({ crop, onEdit, onDelete }: CropCardProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
+  const { add } = useCart();
+
+  const handleAdd = (qty = 1) => {
+    try {
+      if (!add) {
+        console.warn('Cart context not available');
+        toast({ title: 'Cart unavailable', description: 'Unable to add to cart.' });
+        return;
+      }
+      add({ crop_id: crop.id, name: crop.name, price_per_unit: crop.price_per_unit, quantity: qty, farmer_id: crop.farmer_id });
+      toast({ title: 'Added to cart', description: `${crop.name} added to cart.` });
+    } catch (err) {
+      console.error('Add to cart failed', err);
+      toast({ title: 'Error', description: 'Failed to add to cart', variant: 'destructive' });
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -85,7 +102,12 @@ export const CropCard = ({ crop, onEdit, onDelete }: CropCardProps) => {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-1">
-                  <h3 className="font-semibold text-lg truncate">{crop.name}</h3>
+                  <div>
+                    <h3 className="font-semibold text-lg truncate">{crop.name}</h3>
+                    {crop.farmer_name && (
+                      <p className="text-xs text-muted-foreground">Seller: {crop.farmer_name}</p>
+                    )}
+                  </div>
                   <Badge className={getStatusColor(crop.status)}>
                     {crop.status}
                   </Badge>
@@ -126,6 +148,13 @@ export const CropCard = ({ crop, onEdit, onDelete }: CropCardProps) => {
                   className="flex-shrink-0"
                 >
                   <Edit className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  size="sm"
+                  onClick={() => handleAdd(1)}
+                >
+                  Add
                 </Button>
 
                 <AlertDialog>

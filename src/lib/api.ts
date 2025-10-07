@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3001/api';
+export const API_BASE_URL = 'http://localhost:3001/api';
 
 // Auth API
 export const authAPI = {
@@ -31,13 +31,18 @@ export const authAPI = {
 
 // Crop API
 export const cropAPI = {
-  getAll: async (farmerId?: string) => {
-    const url = farmerId 
-      ? `${API_BASE_URL}/crops?farmerId=${farmerId}`
-      : `${API_BASE_URL}/crops`;
+  getAll: async (opts?: { farmerId?: string; q?: string; status?: string; page?: number; limit?: number }) => {
+    const params = new URLSearchParams();
+    if (opts?.farmerId) params.append('farmerId', opts.farmerId);
+    if (opts?.q) params.append('q', String(opts.q));
+    if (opts?.status) params.append('status', opts.status);
+    if (opts?.page) params.append('page', String(opts.page));
+    if (opts?.limit) params.append('limit', String(opts.limit));
+
+    const url = `${API_BASE_URL}/crops${params.toString() ? `?${params.toString()}` : ''}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to fetch crops');
-    return response.json();
+    return response.json(); // { crops: Crop[], total: number }
   },
 
   create: async (cropData: {

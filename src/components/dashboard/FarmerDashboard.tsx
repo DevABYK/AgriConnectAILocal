@@ -21,8 +21,9 @@ const FarmerDashboard = () => {
       }
 
       const currentUser = JSON.parse(userStr);
-      const userCrops = await cropAPI.getAll(currentUser.id);
-      setCrops(userCrops);
+      const res = await cropAPI.getAll({ farmerId: currentUser.id });
+      // API now returns { crops, total }
+      setCrops(res.crops || []);
     } catch (error) {
       console.error('Error fetching crops:', error);
     } finally {
