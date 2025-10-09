@@ -38,9 +38,9 @@ Quick start
 ```powershell
 npm install
 ```
-2. Run the dev server
+2. Run the dev server (frontend and backend)
 ```powershell
-npm run dev
+npm run dev:all
 ```
 3. Open http://localhost:5173 (or the URL shown by the dev server)
 
