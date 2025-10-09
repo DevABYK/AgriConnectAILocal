@@ -284,6 +284,22 @@ export const orderAPI = {
   }
 };
 
+// AgroPlan API
+export const agroplanAPI = {
+  generate: async (payload: { user_id: string; soil_type?: string; location?: string; previous_crops?: string; notes?: string }) => {
+    const response = await fetch(`${API_BASE_URL}/agroplan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || 'Failed to generate agroplan');
+    }
+    return response.json();
+  }
+};
+
 // Types
 export interface User {
   id: string;

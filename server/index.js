@@ -796,6 +796,96 @@ app.get('/api/admins', (req, res) => {
   }
 });
 
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// AgroPlan route - accept soil/location data + optional image and return AI recommendations
+app.post('/api/agroplan/analyze', upload.single('soilImage'), async (req, res) => {
+  try {
+    const {
+      inputMode,
+      location,
+      previousCrops,
+      soilPh,
+      soilMoisture,
+      soilType,
+      simpleInput,
+    } = req.body;
+
+    const soilImage = req.file;
+
+    let userPrompt = '';
+
+    if (inputMode === 'detailed') {
+      userPrompt = `
+        Analyze the following farm data:
+        - Location: ${location}
+        - Soil Type: ${soilType}
+        - Soil pH: ${soilPh}
+        - Soil Moisture: ${soilMoisture}%
+        - Previous Crops: ${previousCrops}
+      `;
+    } else {
+      userPrompt = `
+        Analyze the following farm data:
+        - User Description: "${simpleInput}"
+      `;
+    }
+
+    const systemPrompt = `
+      You are AgroAdvisor, an expert AI agronomist. Your goal is to provide comprehensive, actionable advice to farmers.
+      Analyze the provided data (and image if available) and return a JSON object with the following structure:
+      {
+        "weather": { "location": "...", "temperature": "...", "forecast": "...", "wind": "..." },
+        "soilAnalysis": { "ph": "...", "moisture": "...", "type": "...", "summary": "..." },
+        "warnings": [{ "title": "...", "description": "..." }],
+        "recommendations": {
+          "crops": [{ "name": "...", "suitability": "High/Medium/Low", "notes": "..." }],
+          "fertilizer": "...",
+          "irrigation": "...",
+          "sustainability": ["...", "...", "..."]
+        }
+      }
+      - Infer the weather based on the location.
+      - If an image is provided, analyze it for soil color, texture, and potential issues.
+      - The response MUST be a valid JSON object.
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: content },
+      ],
+      response_format: { type: 'json_object' },
+    });
+
+    const analysis = JSON.parse(response.choices[0].message.content);
+
+    // Optionally, save the analysis to the database
+    // const { userId } = req.body; // Assuming you send userId
+    // if (userId) {
+    //   db.prepare('INSERT INTO agroplan_data (id, user_id, recommendations) VALUES (?, ?, ?)')
+    //     .run(uuidv4(), userId, JSON.stringify(analysis));
+    // }
+
+    res.json(analysis);
+
+  } catch (error) {
+    console.error('Error in /api/agroplan/analyze:', error);
+
+    // Handle specific API errors
+    if (error.status === 402 || error.status === 429) {
+      return res.status(402).json({ error: 'Insufficient API credits or quota exceeded. Please check your OpenAI account billing and top up if necessary to continue using the AI advisory features.' });
+    }
+
+    res.status(500).json({ error: 'Failed to generate AI analysis.' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
