@@ -8,7 +8,7 @@ import { CartPanel } from "@/components/Cart/CartPanel";
 import { useCart } from "@/contexts/CartContext";
 
 interface DashboardNavProps {
-  userType: "farmer" | "buyer";
+  userType: "farmer" | "buyer" | "admin" | "super_admin";
   onLogout: () => void;
 }
 
@@ -46,22 +46,24 @@ const DashboardNav = ({ userType, onLogout }: DashboardNavProps) => {
               </Button>
             </Link>
 
-            {/* Cart sheet trigger */}
-            <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger asChild>
-            <Button aria-label="Open cart" variant="ghost" size="sm" className="relative">
-                  <ShoppingCart className="h-4 w-4" />
-                  {items.length > 0 && (
-                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold leading-none text-white bg-red-600 rounded-full">
-                      {items.reduce((s: number, it: any) => s + it.quantity, 0)}
-                    </span>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" size="sm" className="p-0">
-                <CartPanel />
-              </SheetContent>
-            </Sheet>
+            {/* Cart sheet trigger - only show for farmers and buyers */}
+            {userType !== 'admin' && userType !== 'super_admin' && (
+              <Sheet open={open} onOpenChange={setOpen}>
+                <SheetTrigger asChild>
+                  <Button aria-label="Open cart" variant="ghost" size="sm" className="relative">
+                    <ShoppingCart className="h-4 w-4" />
+                    {items.length > 0 && (
+                      <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold leading-none text-white bg-red-600 rounded-full">
+                        {items.reduce((s: number, it: any) => s + it.quantity, 0)}
+                      </span>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="p-0">
+                  <CartPanel />
+                </SheetContent>
+              </Sheet>
+            )}
 
             <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-2">
               <LogOut className="h-4 w-4" />

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { User } from "@/lib/api";
 import FarmerDashboard from "@/components/dashboard/FarmerDashboard";
 import BuyerDashboard from "@/components/dashboard/BuyerDashboard";
+import AdminDashboard from "@/components/dashboard/AdminDashboard";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 
 const Dashboard = () => {
@@ -41,10 +42,24 @@ const Dashboard = () => {
     return null; // Will redirect to auth
   }
 
+  const renderDashboard = () => {
+    switch (user.user_type) {
+      case 'farmer':
+        return <FarmerDashboard />;
+      case 'buyer':
+        return <BuyerDashboard />;
+      case 'admin':
+      case 'super_admin':
+        return <AdminDashboard />;
+      default:
+        return <BuyerDashboard />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <DashboardNav userType={user.user_type} onLogout={handleLogout} />
-      {user.user_type === "farmer" ? <FarmerDashboard /> : <BuyerDashboard />}
+      {renderDashboard()}
     </div>
   );
 };

@@ -41,7 +41,7 @@ export const CartPanel = () => {
       {Object.entries(byFarmer).map(([farmerId, items]) => (
         <div key={farmerId} className="border p-3 rounded">
           <div className="flex items-center justify-between mb-2">
-            <strong>Farmer: {farmerId}</strong>
+            <strong>Farmer: {items[0]?.farmer_name || farmerId}</strong>
             <div className="space-x-2">
               <span className="text-sm font-medium">Total: KES {farmerTotal(items)}</span>
               <Button size="sm" onClick={() => clearForFarmer(farmerId)}>Clear</Button>

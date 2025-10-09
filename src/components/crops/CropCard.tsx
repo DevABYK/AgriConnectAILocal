@@ -36,7 +36,7 @@ export const CropCard = ({ crop, onEdit, onDelete }: CropCardProps) => {
         toast({ title: 'Cart unavailable', description: 'Unable to add to cart.' });
         return;
       }
-      add({ crop_id: crop.id, name: crop.name, price_per_unit: crop.price_per_unit, quantity: qty, farmer_id: crop.farmer_id });
+  add({ crop_id: crop.id, name: crop.name, price_per_unit: crop.price_per_unit, quantity: qty, farmer_id: crop.farmer_id, farmer_name: crop.farmer_name });
       toast({ title: 'Added to cart', description: `${crop.name} added to cart.` });
     } catch (err) {
       console.error('Add to cart failed', err);

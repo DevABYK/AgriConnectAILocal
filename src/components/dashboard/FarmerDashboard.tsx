@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, TrendingUp, Package, DollarSign } from "lucide-react";
-import { cropAPI, Crop } from "@/lib/api";
+import { cropAPI, Crop, API_BASE_URL } from "@/lib/api";
 import { AddCropForm } from "@/components/crops/AddCropForm";
 import { CropCard } from "@/components/crops/CropCard";
 
@@ -11,6 +11,7 @@ const FarmerDashboard = () => {
   const [isAddCropOpen, setIsAddCropOpen] = useState(false);
   const [editingCrop, setEditingCrop] = useState<Crop | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [orders, setOrders] = useState<any[]>([]);
 
   const fetchCrops = async () => {
     try {
@@ -31,8 +32,23 @@ const FarmerDashboard = () => {
     }
   };
 
+  const fetchOrders = async () => {
+    try {
+      const userStr = localStorage.getItem('currentUser');
+      if (!userStr) return;
+      const currentUser = JSON.parse(userStr);
+      const res = await fetch(`${API_BASE_URL}/orders?farmerId=${currentUser.id}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setOrders(data || []);
+    } catch (err) {
+      console.error('Error fetching orders', err);
+    }
+  };
+
   useEffect(() => {
     fetchCrops();
+    fetchOrders();
   }, []);
 
   const handleCropAdded = () => {
@@ -193,10 +209,25 @@ const FarmerDashboard = () => {
           <CardDescription>Track your pending and completed orders</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-12 text-muted-foreground">
-            <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No orders yet. Your orders will appear here once buyers start purchasing.</p>
-          </div>
+          {orders.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No orders yet. Your orders will appear here once buyers start purchasing.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {orders.map((o) => (
+                <div key={o.id} className="p-3 border rounded-lg flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{o.crop_name}</p>
+                    <p className="text-sm text-muted-foreground">Qty: {o.quantity} • Total: KES {o.total_price}</p>
+                    <p className="text-sm text-muted-foreground">Status: {o.status}{o.approver_name ? ` • Approved by ${o.approver_name}` : ''}</p>
+                  </div>
+                  <div className="text-sm text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type CartItem = { crop_id: string; name: string; price_per_unit: number; quantity: number; farmer_id: string };
+type CartItem = { crop_id: string; name: string; price_per_unit: number; quantity: number; farmer_id: string; farmer_name?: string };
 
 const STORAGE_KEY = 'agri_cart_v1';
 

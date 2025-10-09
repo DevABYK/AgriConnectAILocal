@@ -7,6 +7,10 @@ import fs from 'fs';
 import Database from 'better-sqlite3';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,12 +33,32 @@ if (!fs.existsSync(dbDir)) {
 
 const db = new Database(dbPath);
 
-// Ensure buyer_contact column exists in orders table (for older DBs)
+// Database migrations for older DBs
 try {
+  // Ensure buyer_contact column exists in orders table
   const col = db.prepare("PRAGMA table_info(orders)").all().find(c => c.name === 'buyer_contact');
   if (!col) {
     db.prepare("ALTER TABLE orders ADD COLUMN buyer_contact TEXT").run();
     console.log('Migrated: added orders.buyer_contact');
+  }
+  // Ensure approved_by column exists in orders table
+  const approvedCol = db.prepare("PRAGMA table_info(orders)").all().find(c => c.name === 'approved_by');
+  if (!approvedCol) {
+    db.prepare("ALTER TABLE orders ADD COLUMN approved_by TEXT").run();
+    console.log('Migrated: added orders.approved_by');
+  }
+
+  // Update user_type CHECK constraint to include admin types
+  try {
+    db.exec(`
+      ALTER TABLE users ADD COLUMN user_type_new TEXT CHECK (user_type_new IN ('farmer', 'buyer', 'admin', 'super_admin'));
+      UPDATE users SET user_type_new = user_type;
+      ALTER TABLE users DROP COLUMN user_type;
+      ALTER TABLE users RENAME COLUMN user_type_new TO user_type;
+    `);
+    console.log('Migrated: updated user_type constraint to include admin types');
+  } catch (err) {
+    // Constraint might already be updated, ignore
   }
 } catch (err) {
   // ignore migration errors
@@ -47,7 +71,7 @@ db.exec(`
     email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     full_name TEXT,
-    user_type TEXT NOT NULL CHECK (user_type IN ('farmer', 'buyer')),
+    user_type TEXT NOT NULL CHECK (user_type IN ('farmer', 'buyer', 'admin', 'super_admin')),
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -116,6 +140,22 @@ db.exec(`
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   );
 `);
+
+// Create super admin account if it doesn't exist
+const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
+const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD;
+
+if (superAdminEmail && superAdminPassword) {
+  const existingSuperAdmin = db.prepare('SELECT * FROM users WHERE email = ?').get(superAdminEmail);
+  if (!existingSuperAdmin) {
+    const passwordHash = await bcrypt.hash(superAdminPassword, 10);
+    const superAdminId = uuidv4();
+    db.prepare('INSERT INTO users (id, email, password_hash, full_name, user_type) VALUES (?, ?, ?, ?, ?)')
+      .run(superAdminId, superAdminEmail, passwordHash, 'Super Admin', 'super_admin');
+    db.prepare('INSERT INTO profiles (id) VALUES (?)').run(superAdminId);
+    console.log('Super admin account created successfully');
+  }
+}
 
 // File upload configuration
 const storage = multer.diskStorage({
@@ -385,6 +425,372 @@ app.get('/api/orders', (req, res) => {
       orders = db.prepare(`SELECT o.*, c.name as crop_name, c.image_url, u.full_name as buyer_name FROM orders o LEFT JOIN crops c ON o.crop_id = c.id LEFT JOIN users u ON o.buyer_id = u.id ORDER BY o.created_at DESC`).all();
     }
     res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Approve order (admin only)
+app.put('/api/orders/:id/approve', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const token = authHeader.substring(7);
+    const adminUser = db.prepare('SELECT * FROM users WHERE id = ?').get(token);
+    if (!adminUser || !['admin', 'super_admin'].includes(adminUser.user_type)) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const { id } = req.params;
+
+    // fetch order and related crop/farmer
+    const order = db.prepare(`SELECT o.*, c.farmer_id, c.name as crop_name, u.full_name as buyer_name FROM orders o JOIN crops c ON o.crop_id = c.id LEFT JOIN users u ON o.buyer_id = u.id WHERE o.id = ?`).get(id);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+
+    if (order.status !== 'pending') {
+      return res.status(400).json({ error: 'Only pending orders can be approved' });
+    }
+
+    // update order
+    db.prepare('UPDATE orders SET status = ?, approved_by = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run('confirmed', adminUser.id, id);
+
+    // notify farmer via messages table
+    const farmerId = order.farmer_id;
+    if (farmerId) {
+      const msgId = uuidv4();
+      const content = `Your order ${order.id} for ${order.crop_name} has been approved by ${adminUser.full_name || adminUser.email}`;
+      db.prepare('INSERT INTO messages (id, sender_id, receiver_id, content) VALUES (?, ?, ?, ?)').run(msgId, adminUser.id, farmerId, content);
+    }
+
+    // return updated order with approver name
+    const updated = db.prepare(`SELECT o.*, c.name as crop_name, c.image_url, u.full_name as buyer_name, a.full_name as approver_name FROM orders o LEFT JOIN crops c ON o.crop_id = c.id LEFT JOIN users u ON o.buyer_id = u.id LEFT JOIN users a ON o.approved_by = a.id WHERE o.id = ?`).get(id);
+
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Admin Routes
+// Get all users (admin only)
+app.get('/api/admin/users', (req, res) => {
+  try {
+    // Check if user is admin or super_admin
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const token = authHeader.substring(7);
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(token);
+    if (!user || !['admin', 'super_admin'].includes(user.user_type)) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const users = db.prepare(`
+      SELECT u.id, u.email, u.full_name, u.user_type, u.created_at,
+             p.avatar_url, p.location, p.phone, p.rating
+      FROM users u
+      LEFT JOIN profiles p ON u.id = p.id
+      ORDER BY u.created_at DESC
+    `).all();
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create user (admin only)
+app.post('/api/admin/users', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const token = authHeader.substring(7);
+    const adminUser = db.prepare('SELECT * FROM users WHERE id = ?').get(token);
+    if (!adminUser || !['admin', 'super_admin'].includes(adminUser.user_type)) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const { email, password, fullName, userType } = req.body;
+
+    // Validate user type
+    if (!['farmer', 'buyer', 'admin'].includes(userType)) {
+      return res.status(400).json({ error: 'Invalid user type' });
+    }
+
+    // Only super_admin can create admin accounts
+    if (userType === 'admin' && adminUser.user_type !== 'super_admin') {
+      return res.status(403).json({ error: 'Only super admin can create admin accounts' });
+    }
+
+    const existingUser = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const userId = uuidv4();
+
+    db.prepare('INSERT INTO users (id, email, password_hash, full_name, user_type) VALUES (?, ?, ?, ?, ?)')
+      .run(userId, email, passwordHash, fullName, userType);
+
+    db.prepare('INSERT INTO profiles (id) VALUES (?)').run(userId);
+
+    res.json({
+      id: userId,
+      email,
+      full_name: fullName,
+      user_type: userType
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update user (admin only)
+app.put('/api/admin/users/:id', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const token = authHeader.substring(7);
+    const adminUser = db.prepare('SELECT * FROM users WHERE id = ?').get(token);
+    if (!adminUser || !['admin', 'super_admin'].includes(adminUser.user_type)) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const { id } = req.params;
+    const { email, password, fullName, userType } = req.body;
+
+    // Prevent modifying super_admin
+    const targetUser = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+    if (!targetUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (targetUser.user_type === 'super_admin') {
+      return res.status(403).json({ error: 'Cannot modify super admin' });
+    }
+
+    // Only super_admin can modify admin accounts
+    if (targetUser.user_type === 'admin' && adminUser.user_type !== 'super_admin') {
+      return res.status(403).json({ error: 'Only super admin can modify admin accounts' });
+    }
+
+    // Validate user type
+    if (userType && !['farmer', 'buyer', 'admin'].includes(userType)) {
+      return res.status(400).json({ error: 'Invalid user type' });
+    }
+
+    // Only super_admin can change to admin
+    if (userType === 'admin' && adminUser.user_type !== 'super_admin') {
+      return res.status(403).json({ error: 'Only super admin can create admin accounts' });
+    }
+
+    let updateFields = [];
+    let params = [];
+
+    if (email) {
+      updateFields.push('email = ?');
+      params.push(email);
+    }
+
+    if (password) {
+      const passwordHash = await bcrypt.hash(password, 10);
+      updateFields.push('password_hash = ?');
+      params.push(passwordHash);
+    }
+
+    if (fullName) {
+      updateFields.push('full_name = ?');
+      params.push(fullName);
+    }
+
+    if (userType) {
+      updateFields.push('user_type = ?');
+      params.push(userType);
+    }
+
+    if (updateFields.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    params.push(id);
+    db.prepare(`UPDATE users SET ${updateFields.join(', ')} WHERE id = ?`).run(...params);
+
+    const updatedUser = db.prepare(`
+      SELECT u.id, u.email, u.full_name, u.user_type, u.created_at,
+             p.avatar_url, p.location, p.phone, p.rating
+      FROM users u
+      LEFT JOIN profiles p ON u.id = p.id
+      WHERE u.id = ?
+    `).get(id);
+
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete user (admin only)
+app.delete('/api/admin/users/:id', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const token = authHeader.substring(7);
+    const adminUser = db.prepare('SELECT * FROM users WHERE id = ?').get(token);
+    if (!adminUser || !['admin', 'super_admin'].includes(adminUser.user_type)) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const { id } = req.params;
+
+    // Prevent deleting super_admin
+    const targetUser = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+    if (!targetUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (targetUser.user_type === 'super_admin') {
+      return res.status(403).json({ error: 'Cannot delete super admin' });
+    }
+
+    // Only super_admin can delete admin accounts
+    if (targetUser.user_type === 'admin' && adminUser.user_type !== 'super_admin') {
+      return res.status(403).json({ error: 'Only super admin can delete admin accounts' });
+    }
+
+    db.prepare('DELETE FROM users WHERE id = ?').run(id);
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Messaging Routes
+// Get messages for user
+app.get('/api/messages', (req, res) => {
+  try {
+    const { userId } = req.query;
+    if (!userId) {
+      return res.status(400).json({ error: 'userId required' });
+    }
+
+    const messages = db.prepare(`
+      SELECT m.*,
+             s.full_name as sender_name, s.user_type as sender_type,
+             r.full_name as receiver_name, r.user_type as receiver_type
+      FROM messages m
+      LEFT JOIN users s ON m.sender_id = s.id
+      LEFT JOIN users r ON m.receiver_id = r.id
+      WHERE m.sender_id = ? OR m.receiver_id = ?
+      ORDER BY m.created_at DESC
+    `).all(userId, userId);
+
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Send message
+app.post('/api/messages', (req, res) => {
+  try {
+    const { senderId, receiverId, content } = req.body;
+
+    if (!senderId || !receiverId || !content) {
+      return res.status(400).json({ error: 'senderId, receiverId, and content required' });
+    }
+
+    // Validate users exist
+    const sender = db.prepare('SELECT * FROM users WHERE id = ?').get(senderId);
+    const receiver = db.prepare('SELECT * FROM users WHERE id = ?').get(receiverId);
+
+    if (!sender || !receiver) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Validate messaging permissions
+    const isAdminSender = ['admin', 'super_admin'].includes(sender.user_type);
+    const isAdminReceiver = ['admin', 'super_admin'].includes(receiver.user_type);
+
+    // Allow: user to admin, admin to user, admin to admin
+    if (!isAdminSender && !isAdminReceiver) {
+      return res.status(403).json({ error: 'Users cannot message each other directly' });
+    }
+
+    const messageId = uuidv4();
+    db.prepare('INSERT INTO messages (id, sender_id, receiver_id, content) VALUES (?, ?, ?, ?)')
+      .run(messageId, senderId, receiverId, content);
+
+    const message = db.prepare(`
+      SELECT m.*,
+             s.full_name as sender_name, s.user_type as sender_type,
+             r.full_name as receiver_name, r.user_type as receiver_type
+      FROM messages m
+      LEFT JOIN users s ON m.sender_id = s.id
+      LEFT JOIN users r ON m.receiver_id = r.id
+      WHERE m.id = ?
+    `).get(messageId);
+
+    res.json(message);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Mark message as read
+app.put('/api/messages/:id/read', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'userId required' });
+    }
+
+    // Verify user can mark this message as read
+    const message = db.prepare('SELECT * FROM messages WHERE id = ?').get(id);
+    if (!message) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+
+    if (message.receiver_id !== userId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    db.prepare('UPDATE messages SET read = 1 WHERE id = ?').run(id);
+    res.json({ message: 'Message marked as read' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Public route to get admins
+app.get('/api/admins', (req, res) => {
+  try {
+    const admins = db.prepare(`
+      SELECT u.id, u.email, u.full_name, u.user_type, u.created_at,
+             p.avatar_url, p.location, p.phone, p.rating
+      FROM users u
+      LEFT JOIN profiles p ON u.id = p.id
+      WHERE u.user_type IN ('admin', 'super_admin')
+      ORDER BY u.user_type DESC, u.created_at ASC
+    `).all();
+
+    res.json(admins);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
