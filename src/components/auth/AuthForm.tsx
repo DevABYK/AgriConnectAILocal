@@ -116,7 +116,7 @@ export const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Farm Link Intelligence</CardTitle>
+          <CardTitle className="text-2xl font-bold">AgriConnect</CardTitle>
           <CardDescription>
             Connect farmers and buyers in Kenya
           </CardDescription>

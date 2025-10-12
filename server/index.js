@@ -858,7 +858,7 @@ app.post('/api/agroplan/analyze', upload.single('soilImage'), async (req, res) =
       model: 'gpt-4o',
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: content },
+        { role: 'user', content: userPrompt },
       ],
       response_format: { type: 'json_object' },
     });
