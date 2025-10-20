@@ -1,6 +1,8 @@
-export const API_BASE_URL = import.meta.env.DEV
-  ? 'http://localhost:3001/api'
-  : 'https://agri-connect-ai-local-62lqxpyjs-allans-projects-5df5c5a9.vercel.app/api';
+// Get API base URL from environment variable, with fallbacks
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV
+    ? 'http://localhost:3001/api'
+    : `${window.location.origin}/api`);
 
 // Auth API
 export const authAPI = {

@@ -1,4 +1,4 @@
-# AgriConnect2 - Farm Link Intelligence
+# AgriConnect - Farm Link Intelligence
 
 A comprehensive web application connecting farmers and buyers in Kenya, featuring crop listings with photos, real-time messaging, AI-powered agricultural planning, and integrated payment systems.
 
@@ -20,9 +20,9 @@ A comprehensive web application connecting farmers and buyers in Kenya, featurin
 - **File Storage**: Local file system for crop images
 - **State Management**: React hooks
 ```markdown
-# AgriConnect2 — Farm Link Intelligence
+# AgriConnect — Farm Link Intelligence
 
-A modern web platform connecting farmers and buyers. AgriConnect2 provides crop listings with photos, role-based dashboards (farmer & buyer), real-time chat, and an AI-powered AgroPlan assistant to help with crop planning.
+A modern web platform connecting farmers and buyers. AgriConnect provides crop listings with photos, role-based dashboards (farmer & buyer), real-time chat, and an AI-powered AgroPlan assistant to help with crop planning.
 
 Status: Work in progress — actively developed
 
@@ -38,11 +38,16 @@ Quick start
 ```powershell
 npm install
 ```
-2. Run the dev server (frontend and backend)
+2. Setup environment variables
+```powershell
+cp .env.example .env
+# Edit .env with your OpenAI API key and other settings
+```
+3. Run the dev server (frontend and backend)
 ```powershell
 npm run dev:all
 ```
-3. Open http://localhost:5173 (or the URL shown by the dev server)
+4. Open http://localhost:5173 (or the URL shown by the dev server)
 
 Notes
 - The project uses Vite + React + TypeScript and Tailwind (shadcn/ui components).
