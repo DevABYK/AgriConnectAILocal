@@ -1,4 +1,6 @@
-export const API_BASE_URL = 'http://localhost:3001/api';
+export const API_BASE_URL = import.meta.env.DEV
+  ? 'http://localhost:3001/api'
+  : 'https://agri-connect-ai-local-62lqxpyjs-allans-projects-5df5c5a9.vercel.app/api';
 
 // Auth API
 export const authAPI = {

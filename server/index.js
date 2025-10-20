@@ -19,7 +19,12 @@ const app = express();
 const PORT = 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production'
+    ? ['https://agri-connect-ai-local-62lqxpyjs-allans-projects-5df5c5a9.vercel.app']
+    : ['http://localhost:5173', 'http://localhost:8080'],
+  credentials: true
+}));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
