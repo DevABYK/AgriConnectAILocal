@@ -2,11 +2,22 @@
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.DEV
     ? 'http://localhost:3001/api'
-    : `${window.location.origin}/api`);
+    : null); // Disable API calls in production (demo only)
 
 // Auth API
 export const authAPI = {
   register: async (email: string, password: string, fullName: string, userType: 'farmer' | 'buyer') => {
+    if (!API_BASE_URL) {
+      // Demo mode - simulate successful registration
+      return {
+        id: 'demo-user-' + Date.now(),
+        email,
+        full_name: fullName,
+        user_type: userType,
+        created_at: new Date().toISOString()
+      };
+    }
+
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -20,6 +31,17 @@ export const authAPI = {
   },
 
   login: async (email: string, password: string) => {
+    if (!API_BASE_URL) {
+      // Demo mode - simulate successful login
+      return {
+        id: 'demo-user-' + Date.now(),
+        email,
+        full_name: 'Demo User',
+        user_type: 'farmer',
+        created_at: new Date().toISOString()
+      };
+    }
+
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -36,6 +58,11 @@ export const authAPI = {
 // Crop API
 export const cropAPI = {
   getAll: async (opts?: { farmerId?: string; q?: string; status?: string; page?: number; limit?: number }) => {
+    if (!API_BASE_URL) {
+      // Demo mode - return empty crops list
+      return { crops: [], total: 0 };
+    }
+
     const params = new URLSearchParams();
     if (opts?.farmerId) params.append('farmerId', opts.farmerId);
     if (opts?.q) params.append('q', String(opts.q));
@@ -291,7 +318,35 @@ export const orderAPI = {
 // AgroPlan API
 export const agroplanAPI = {
   generate: async (payload: { user_id: string; soil_type?: string; location?: string; previous_crops?: string; notes?: string }) => {
-    const response = await fetch(`${API_BASE_URL}/agroplan`, {
+    if (!API_BASE_URL) {
+      // Demo mode - return mock agroplan response
+      return {
+        weather: {
+          location: "Demo Location",
+          temperature: "25°C",
+          forecast: "Sunny with clear skies",
+          wind: "10 km/h",
+        },
+        soilAnalysis: {
+          ph: 6.5,
+          moisture: "60%",
+          type: "Loamy",
+          summary: "Demo soil analysis - this is a mock response for demonstration purposes.",
+        },
+        warnings: [],
+        recommendations: {
+          crops: [
+            { name: "Demo Crop 1", suitability: "High", notes: "Recommended for demo purposes" },
+            { name: "Demo Crop 2", suitability: "Medium", notes: "Alternative option" },
+          ],
+          fertilizer: "Demo fertilizer recommendation",
+          irrigation: "Demo irrigation strategy",
+          sustainability: ["Demo sustainability tip 1", "Demo sustainability tip 2"],
+        },
+      };
+    }
+
+    const response = await fetch(`${API_BASE_URL}/agroplan/analyze`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
