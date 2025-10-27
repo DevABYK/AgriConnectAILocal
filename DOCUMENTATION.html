@@ -1,0 +1,421 @@
+<h1 id="agriconnect---farm-link-intelligence">AgriConnect - Farm Link
+Intelligence</h1>
+<p>A comprehensive web application connecting farmers and buyers in
+Kenya, featuring crop listings with photos, real-time messaging,
+AI-powered agricultural planning, and integrated payment systems.</p>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#features">Features</a></li>
+<li><a href="#technology-stack">Technology Stack</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#api-documentation">API Documentation</a></li>
+<li><a href="#database-schema">Database Schema</a></li>
+<li><a href="#testing">Testing</a></li>
+<li><a href="#contributing">Contributing</a></li>
+<li><a href="#license">License</a></li>
+</ul>
+<h2 id="introduction">Introduction</h2>
+<p>AgriConnect is a modern web platform designed to bridge the gap
+between smallholder farmers and buyers across Africa, particularly in
+Kenya. The application provides a marketplace for agricultural products
+with advanced features like AI-powered crop planning, real-time
+communication, and role-based dashboards for farmers, buyers, and
+administrators.</p>
+<p>The platform aims to: - Empower farmers with better market access and
+fair pricing - Connect buyers directly with local producers - Provide
+intelligent agricultural planning tools - Facilitate secure transactions
+and communication</p>
+<h2 id="features">Features</h2>
+<h3 id="core-functionality">Core Functionality</h3>
+<ul>
+<li><strong>User Authentication</strong>: Secure registration and login
+with role-based access (Farmer, Buyer, Admin, Super Admin)</li>
+<li><strong>Crop Listings</strong>: Farmers can list crops with photos,
+descriptions, pricing, and location data</li>
+<li><strong>Marketplace</strong>: Buyers can browse and search crops by
+various criteria</li>
+<li><strong>Real-time Messaging</strong>: Direct communication between
+farmers and buyers</li>
+<li><strong>Order Management</strong>: Bulk ordering system with status
+tracking</li>
+<li><strong>Admin Panel</strong>: User management, order approval, and
+system oversight</li>
+</ul>
+<h3 id="ai-powered-features">AI-Powered Features</h3>
+<ul>
+<li><strong>AgroPlan AI</strong>: Intelligent crop planning assistant
+using OpenAI GPT-4</li>
+<li><strong>Soil Analysis</strong>: AI-driven recommendations based on
+soil type, pH, moisture, and location</li>
+<li><strong>Weather Integration</strong>: Location-based weather
+forecasts and recommendations</li>
+<li><strong>Sustainability Insights</strong>: Regenerative agriculture
+practices and environmental recommendations</li>
+</ul>
+<h3 id="technical-features">Technical Features</h3>
+<ul>
+<li><strong>Responsive Design</strong>: Mobile-first approach with
+modern UI components</li>
+<li><strong>File Uploads</strong>: Image storage for crop listings and
+soil analysis</li>
+<li><strong>Local Storage</strong>: SQLite database with file-based
+image storage</li>
+<li><strong>Demo Mode</strong>: Pre-configured scenarios for testing and
+demonstration</li>
+<li><strong>End-to-End Testing</strong>: Playwright-based test
+suite</li>
+</ul>
+<h2 id="technology-stack">Technology Stack</h2>
+<h3 id="frontend">Frontend</h3>
+<ul>
+<li><strong>React 18</strong>: Modern React with hooks and functional
+components</li>
+<li><strong>TypeScript</strong>: Type-safe development</li>
+<li><strong>Vite</strong>: Fast build tool and development server</li>
+<li><strong>shadcn/ui</strong>: High-quality UI component library</li>
+<li><strong>Tailwind CSS</strong>: Utility-first CSS framework</li>
+<li><strong>React Router</strong>: Client-side routing</li>
+<li><strong>React Query</strong>: Data fetching and state
+management</li>
+<li><strong>Lucide React</strong>: Icon library</li>
+</ul>
+<h3 id="backend">Backend</h3>
+<ul>
+<li><strong>Node.js</strong>: JavaScript runtime</li>
+<li><strong>Express.js</strong>: Web framework for API development</li>
+<li><strong>SQLite</strong>: Lightweight database with
+better-sqlite3</li>
+<li><strong>bcryptjs</strong>: Password hashing</li>
+<li><strong>Multer</strong>: File upload handling</li>
+<li><strong>CORS</strong>: Cross-origin resource sharing</li>
+<li><strong>OpenAI API</strong>: AI-powered agricultural
+recommendations</li>
+</ul>
+<h3 id="development-tools">Development Tools</h3>
+<ul>
+<li><strong>ESLint</strong>: Code linting</li>
+<li><strong>Playwright</strong>: End-to-end testing</li>
+<li><strong>Vite Plugin React</strong>: React integration for Vite</li>
+<li><strong>TypeScript ESLint</strong>: TypeScript linting</li>
+</ul>
+<h3 id="deployment">Deployment</h3>
+<ul>
+<li><strong>Local Development</strong>: Concurrent frontend/backend
+development servers</li>
+<li><strong>Production Ready</strong>: Environment variable
+configuration</li>
+<li><strong>File Storage</strong>: Local file system for images (easily
+replaceable with cloud storage)</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>Node.js (v16 or higher)</li>
+<li>npm or bun package manager</li>
+<li>OpenAI API key (for AI features)</li>
+</ul>
+<h3 id="setup-steps">Setup Steps</h3>
+<ol type="1">
+<li><p><strong>Clone the repository</strong></p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone <span class="op">&lt;</span>repository-url<span class="op">&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> agriconnect</span></code></pre></div></li>
+<li><p><strong>Install dependencies</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install</span></code></pre></div></li>
+<li><p><strong>Environment configuration</strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> .env.example .env</span></code></pre></div>
+<p>Edit <code>.env</code> with your configuration:</p>
+<pre class="env"><code># OpenAI API Key (required for AI features)
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Super Admin Credentials (optional)
+SUPER_ADMIN_EMAIL=admin@example.com
+SUPER_ADMIN_PASSWORD=secure_password
+
+# Environment
+NODE_ENV=development</code></pre></li>
+<li><p><strong>Database setup</strong> The SQLite database is
+automatically created and migrated when the server starts.</p></li>
+<li><p><strong>Start development servers</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run dev:all</span></code></pre></div>
+<p>This runs both frontend (http://localhost:5173) and backend
+(http://localhost:3001) concurrently.</p></li>
+<li><p><strong>Access the application</strong></p>
+<ul>
+<li>Frontend: http://localhost:5173</li>
+<li>Backend API: http://localhost:3001</li>
+</ul></li>
+</ol>
+<h2 id="usage">Usage</h2>
+<h3 id="user-roles">User Roles</h3>
+<h4 id="farmers">Farmers</h4>
+<ul>
+<li>Register as a farmer</li>
+<li>Create crop listings with photos and details</li>
+<li>Manage existing listings (edit, delete, update status)</li>
+<li>View and respond to buyer inquiries</li>
+<li>Access AgroPlan AI for crop planning</li>
+<li>Track orders and earnings</li>
+</ul>
+<h4 id="buyers">Buyers</h4>
+<ul>
+<li>Register as a buyer</li>
+<li>Browse crop listings with search and filters</li>
+<li>Place bulk orders</li>
+<li>Communicate directly with farmers</li>
+<li>Track order status</li>
+</ul>
+<h4 id="administrators">Administrators</h4>
+<ul>
+<li>Manage all users (create, edit, delete)</li>
+<li>Approve pending orders</li>
+<li>View system analytics</li>
+<li>Access admin messaging</li>
+</ul>
+<h3 id="key-workflows">Key Workflows</h3>
+<h4 id="crop-listing-process">Crop Listing Process</h4>
+<ol type="1">
+<li>Farmer logs in and navigates to dashboard</li>
+<li>Clicks “Add Crop” with details and photo upload</li>
+<li>Crop appears in marketplace for buyers</li>
+</ol>
+<h4 id="order-process">Order Process</h4>
+<ol type="1">
+<li>Buyer browses crops and adds to cart</li>
+<li>Places order with contact information</li>
+<li>Admin approves the order</li>
+<li>Farmer receives notification and fulfills order</li>
+</ol>
+<h4 id="ai-planning">AI Planning</h4>
+<ol type="1">
+<li>User provides farm data (detailed or simple input)</li>
+<li>AI analyzes soil, weather, and crop history</li>
+<li>Receives personalized recommendations</li>
+</ol>
+<h2 id="api-documentation">API Documentation</h2>
+<p>The API follows RESTful conventions and uses JSON for data
+exchange.</p>
+<h3 id="base-url">Base URL</h3>
+<pre><code>http://localhost:3001/api</code></pre>
+<h3 id="authentication">Authentication</h3>
+<p>Most endpoints require authentication via Bearer token in
+Authorization header:</p>
+<pre><code>Authorization: Bearer &lt;user_id&gt;</code></pre>
+<h3 id="endpoints">Endpoints</h3>
+<h4 id="authentication-1">Authentication</h4>
+<ul>
+<li><code>POST /auth/register</code> - User registration</li>
+<li><code>POST /auth/login</code> - User login</li>
+</ul>
+<h4 id="crops">Crops</h4>
+<ul>
+<li><code>GET /crops</code> - List crops (with filtering)</li>
+<li><code>POST /crops</code> - Create crop (multipart/form-data)</li>
+<li><code>PUT /crops/:id</code> - Update crop</li>
+<li><code>DELETE /crops/:id</code> - Delete crop</li>
+</ul>
+<h4 id="users">Users</h4>
+<ul>
+<li><code>GET /users/:id</code> - Get user profile</li>
+</ul>
+<h4 id="orders">Orders</h4>
+<ul>
+<li><code>POST /orders</code> - Create order</li>
+<li><code>GET /orders</code> - List orders</li>
+<li><code>PUT /orders/:id/approve</code> - Approve order (admin
+only)</li>
+</ul>
+<h4 id="messaging">Messaging</h4>
+<ul>
+<li><code>GET /messages</code> - Get user messages</li>
+<li><code>POST /messages</code> - Send message</li>
+<li><code>PUT /messages/:id/read</code> - Mark message as read</li>
+</ul>
+<h4 id="admin">Admin</h4>
+<ul>
+<li><code>GET /admin/users</code> - List all users (admin only)</li>
+<li><code>POST /admin/users</code> - Create user (admin only)</li>
+<li><code>PUT /admin/users/:id</code> - Update user (admin only)</li>
+<li><code>DELETE /admin/users/:id</code> - Delete user (admin only)</li>
+</ul>
+<h4 id="agroplan-ai">AgroPlan AI</h4>
+<ul>
+<li><code>POST /agroplan/analyze</code> - Generate AI analysis
+(multipart/form-data)</li>
+</ul>
+<h4 id="public">Public</h4>
+<ul>
+<li><code>GET /admins</code> - Get list of administrators</li>
+</ul>
+<h3 id="requestresponse-examples">Request/Response Examples</h3>
+<h4 id="create-crop">Create Crop</h4>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> formData <span class="op">=</span> <span class="kw">new</span> <span class="bu">FormData</span>()<span class="op">;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>formData<span class="op">.</span><span class="fu">append</span>(<span class="st">&#39;farmerId&#39;</span><span class="op">,</span> <span class="st">&#39;user-123&#39;</span>)<span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>formData<span class="op">.</span><span class="fu">append</span>(<span class="st">&#39;name&#39;</span><span class="op">,</span> <span class="st">&#39;Maize&#39;</span>)<span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>formData<span class="op">.</span><span class="fu">append</span>(<span class="st">&#39;description&#39;</span><span class="op">,</span> <span class="st">&#39;High-quality maize&#39;</span>)<span class="op">;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>formData<span class="op">.</span><span class="fu">append</span>(<span class="st">&#39;quantity&#39;</span><span class="op">,</span> <span class="st">&#39;100&#39;</span>)<span class="op">;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>formData<span class="op">.</span><span class="fu">append</span>(<span class="st">&#39;unit&#39;</span><span class="op">,</span> <span class="st">&#39;kg&#39;</span>)<span class="op">;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>formData<span class="op">.</span><span class="fu">append</span>(<span class="st">&#39;pricePerUnit&#39;</span><span class="op">,</span> <span class="st">&#39;50&#39;</span>)<span class="op">;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>formData<span class="op">.</span><span class="fu">append</span>(<span class="st">&#39;image&#39;</span><span class="op">,</span> file)<span class="op">;</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">fetch</span>(<span class="st">&#39;/api/crops&#39;</span><span class="op">,</span> {</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">method</span><span class="op">:</span> <span class="st">&#39;POST&#39;</span><span class="op">,</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">body</span><span class="op">:</span> formData</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+<h4 id="ai-analysis">AI Analysis</h4>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> formData <span class="op">=</span> <span class="kw">new</span> <span class="bu">FormData</span>()<span class="op">;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>formData<span class="op">.</span><span class="fu">append</span>(<span class="st">&#39;inputMode&#39;</span><span class="op">,</span> <span class="st">&#39;detailed&#39;</span>)<span class="op">;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>formData<span class="op">.</span><span class="fu">append</span>(<span class="st">&#39;location&#39;</span><span class="op">,</span> <span class="st">&#39;Nakuru, Kenya&#39;</span>)<span class="op">;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>formData<span class="op">.</span><span class="fu">append</span>(<span class="st">&#39;soilType&#39;</span><span class="op">,</span> <span class="st">&#39;loamy&#39;</span>)<span class="op">;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>formData<span class="op">.</span><span class="fu">append</span>(<span class="st">&#39;soilPh&#39;</span><span class="op">,</span> <span class="st">&#39;6.8&#39;</span>)<span class="op">;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">fetch</span>(<span class="st">&#39;/api/agroplan/analyze&#39;</span><span class="op">,</span> {</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">method</span><span class="op">:</span> <span class="st">&#39;POST&#39;</span><span class="op">,</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">body</span><span class="op">:</span> formData</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+<h2 id="database-schema">Database Schema</h2>
+<p>The application uses SQLite with the following tables:</p>
+<h3 id="users-1">users</h3>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> users (</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">id</span> TEXT <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  email TEXT <span class="kw">UNIQUE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  password_hash TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  full_name TEXT,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  user_type TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">CHECK</span> (user_type <span class="kw">IN</span> (<span class="st">&#39;farmer&#39;</span>, <span class="st">&#39;buyer&#39;</span>, <span class="st">&#39;admin&#39;</span>, <span class="st">&#39;super_admin&#39;</span>)),</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  created_at TEXT <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<h3 id="profiles">profiles</h3>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> profiles (</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">id</span> TEXT <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  avatar_url TEXT,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  location TEXT,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  phone TEXT,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  rating <span class="dt">REAL</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">FOREIGN</span> <span class="kw">KEY</span> (<span class="kw">id</span>) <span class="kw">REFERENCES</span> users(<span class="kw">id</span>) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<h3 id="crops-1">crops</h3>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> crops (</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">id</span> TEXT <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  farmer_id TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  name TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  description TEXT,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  quantity <span class="dt">REAL</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  unit TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  price_per_unit <span class="dt">REAL</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  harvest_date TEXT,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  location TEXT,</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  image_url TEXT,</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  status TEXT <span class="kw">DEFAULT</span> <span class="st">&#39;available&#39;</span> <span class="kw">CHECK</span> (status <span class="kw">IN</span> (<span class="st">&#39;available&#39;</span>, <span class="st">&#39;reserved&#39;</span>, <span class="st">&#39;sold&#39;</span>)),</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  created_at TEXT <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  updated_at TEXT <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">FOREIGN</span> <span class="kw">KEY</span> (farmer_id) <span class="kw">REFERENCES</span> users(<span class="kw">id</span>) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<h3 id="messages">messages</h3>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> messages (</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">id</span> TEXT <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  sender_id TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  receiver_id TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  content TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">read</span> <span class="dt">INTEGER</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  created_at TEXT <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">FOREIGN</span> <span class="kw">KEY</span> (sender_id) <span class="kw">REFERENCES</span> users(<span class="kw">id</span>) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">FOREIGN</span> <span class="kw">KEY</span> (receiver_id) <span class="kw">REFERENCES</span> users(<span class="kw">id</span>) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<h3 id="orders-1">orders</h3>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> orders (</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">id</span> TEXT <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  crop_id TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  buyer_id TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  quantity <span class="dt">REAL</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  total_price <span class="dt">REAL</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  buyer_contact TEXT,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  status TEXT <span class="kw">DEFAULT</span> <span class="st">&#39;pending&#39;</span> <span class="kw">CHECK</span> (status <span class="kw">IN</span> (<span class="st">&#39;pending&#39;</span>, <span class="st">&#39;confirmed&#39;</span>, <span class="st">&#39;delivered&#39;</span>, <span class="st">&#39;cancelled&#39;</span>)),</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  delivery_date TEXT,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  created_at TEXT <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  updated_at TEXT <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">FOREIGN</span> <span class="kw">KEY</span> (crop_id) <span class="kw">REFERENCES</span> crops(<span class="kw">id</span>) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="kw">FOREIGN</span> <span class="kw">KEY</span> (buyer_id) <span class="kw">REFERENCES</span> users(<span class="kw">id</span>) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<h3 id="agroplan_data">agroplan_data</h3>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> agroplan_data (</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">id</span> TEXT <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  user_id TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  soil_type TEXT,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  location TEXT,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  previous_crops TEXT,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  recommendations TEXT,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  sustainability_score <span class="dt">INTEGER</span>,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  created_at TEXT <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  updated_at TEXT <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">FOREIGN</span> <span class="kw">KEY</span> (user_id) <span class="kw">REFERENCES</span> users(<span class="kw">id</span>) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<h2 id="testing">Testing</h2>
+<p>The project includes end-to-end tests using Playwright.</p>
+<h3 id="running-tests">Running Tests</h3>
+<ol type="1">
+<li><p><strong>Install Playwright browsers</strong></p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> playwright install</span></code></pre></div></li>
+<li><p><strong>Run tests</strong></p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run playwright:test</span></code></pre></div></li>
+<li><p><strong>Run with UI</strong></p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> playwright test <span class="at">--ui</span></span></code></pre></div></li>
+</ol>
+<h3 id="test-coverage">Test Coverage</h3>
+<p>The current test suite covers: - Add to cart functionality - Order
+placement workflow - Mocked API responses for crops and orders</p>
+<p>Tests are designed to run without a live backend by intercepting API
+calls and providing mock responses.</p>
+<h3 id="integration-testing">Integration Testing</h3>
+<p>For full integration tests against the real backend:</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run e2e:integration</span></code></pre></div>
+<p>This runs a PowerShell script that sets up the environment and runs
+comprehensive tests.</p>
+<h2 id="contributing">Contributing</h2>
+<ol type="1">
+<li>Fork the repository</li>
+<li>Create a feature branch
+(<code>git checkout -b feature/amazing-feature</code>)</li>
+<li>Commit your changes
+(<code>git commit -m 'Add amazing feature'</code>)</li>
+<li>Push to the branch
+(<code>git push origin feature/amazing-feature</code>)</li>
+<li>Open a Pull Request</li>
+</ol>
+<h3 id="development-guidelines">Development Guidelines</h3>
+<ul>
+<li>Follow TypeScript best practices</li>
+<li>Use ESLint configuration</li>
+<li>Write meaningful commit messages</li>
+<li>Add tests for new features</li>
+<li>Update documentation as needed</li>
+</ul>
+<h3 id="code-style">Code Style</h3>
+<ul>
+<li>Use functional components with hooks</li>
+<li>Follow React and TypeScript naming conventions</li>
+<li>Use Tailwind CSS classes for styling</li>
+<li>Keep components modular and reusable</li>
+</ul>
+<h2 id="license">License</h2>
+<p>This project is licensed under the MIT License - see the LICENSE file
+for details.</p>
+<hr />
+<p>For more information or support, please contact the development team
+or open an issue on the project repository.</p>
