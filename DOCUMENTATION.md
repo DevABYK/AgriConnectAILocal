@@ -46,7 +46,7 @@ The platform aims to:
 - **File Uploads**: Image storage for crop listings and soil analysis
 - **Local Storage**: SQLite database with file-based image storage
 - **Demo Mode**: Pre-configured scenarios for testing and demonstration
-- **End-to-End Testing**: Playwright-based test suite
+- **Comprehensive Testing**: Unit tests (Vitest), integration tests, and E2E tests (Playwright)
 
 ## Technology Stack
 
@@ -71,6 +71,8 @@ The platform aims to:
 
 ### Development Tools
 - **ESLint**: Code linting
+- **Vitest**: Unit testing framework
+- **React Testing Library**: Component testing utilities
 - **Playwright**: End-to-end testing
 - **Vite Plugin React**: React integration for Vite
 - **TypeScript ESLint**: TypeScript linting
@@ -356,65 +358,266 @@ CREATE TABLE agroplan_data (
 
 ## Testing
 
-The project includes end-to-end tests using Playwright.
+The project includes comprehensive testing suites covering unit tests, integration tests, and end-to-end tests.
+
+### Test Types
+
+#### Unit Tests (Vitest)
+- **Framework**: Vitest with React Testing Library
+- **Coverage**: API functions, utility functions, and React components
+- **Environment**: jsdom for DOM simulation
+
+#### Integration Tests
+- **Framework**: Playwright with backend integration
+- **Coverage**: Full user workflows with real API calls
+
+#### End-to-End Tests
+- **Framework**: Playwright
+- **Coverage**: Complete user journeys from browser to database
 
 ### Running Tests
 
-1. **Install Playwright browsers**
-   ```bash
-   npx playwright install
-   ```
-
-2. **Run tests**
-   ```bash
-   npm run playwright:test
-   ```
-
-3. **Run with UI**
-   ```bash
-   npx playwright test --ui
-   ```
-
-### Test Coverage
-
-The current test suite covers:
-- Add to cart functionality
-- Order placement workflow
-- Mocked API responses for crops and orders
-
-Tests are designed to run without a live backend by intercepting API calls and providing mock responses.
-
-### Integration Testing
-
-For full integration tests against the real backend:
+#### Unit Tests
 ```bash
+# Run all unit tests
+npm test
+
+# Run unit tests in watch mode
+npm run test:watch
+
+# Run unit tests with UI
+npm run test:ui
+```
+
+#### E2E Tests
+```bash
+# Install Playwright browsers (first time only)
+npx playwright install
+
+# Run E2E tests
+npm run playwright:test
+
+# Run E2E tests with UI
+npx playwright test --ui
+```
+
+#### Integration Tests
+```bash
+# Run full integration tests with backend
 npm run e2e:integration
 ```
 
-This runs a PowerShell script that sets up the environment and runs comprehensive tests.
+### Test Coverage
+
+#### Unit Tests Cover:
+- **API Functions** (`src/lib/__tests__/api.test.ts`):
+  - Authentication (register/login)
+  - Crop management (CRUD operations)
+  - Error handling and validation
+
+- **Utility Functions** (`src/lib/__tests__/utils.test.ts`):
+  - Class name merging (cn function)
+  - Tailwind CSS utilities
+
+- **React Components** (`src/components/auth/__tests__/AuthForm.test.tsx`):
+  - Form validation
+  - User interactions
+  - State management
+  - Error handling
+
+#### E2E Tests Cover:
+- **Authentication Flow** (`playwright/tests/auth-flow.spec.ts`):
+  - User registration and login
+  - Form validation
+  - Error scenarios
+  - Session management
+
+- **Crop Management** (`playwright/tests/crop-management.spec.ts`):
+  - Farmer crop CRUD operations
+  - Buyer search and filtering
+  - Image uploads
+  - Status updates
+
+- **Cart & Orders** (`playwright/tests/cart-order.spec.ts`):
+  - Add to cart functionality
+  - Order placement workflow
+  - Admin approval process
+
+### Test Configuration
+
+#### Vitest Configuration (`vite.config.ts`)
+```typescript
+test: {
+  globals: true,
+  environment: 'jsdom',
+  setupFiles: './src/test/setup.ts',
+  exclude: ['playwright/**', 'node_modules/**'],
+}
+```
+
+#### Playwright Configuration (`playwright.config.ts`)
+```typescript
+const config: PlaywrightTestConfig = {
+  testDir: './playwright/tests',
+  timeout: 30000,
+  use: {
+    baseURL: 'http://localhost:8080',
+    headless: true,
+    viewport: { width: 1280, height: 720 }
+  },
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:8080',
+    reuseExistingServer: true,
+    timeout: 120000
+  }
+};
+```
+
+### Writing Tests
+
+#### Unit Test Example
+```typescript
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { AuthForm } from '../AuthForm'
+
+describe('AuthForm', () => {
+  it('validates email format', async () => {
+    const user = userEvent.setup()
+    render(<AuthForm onAuthSuccess={vi.fn()} />)
+
+    const emailInput = screen.getByLabelText(/email/i)
+    const submitButton = screen.getByRole('button', { name: /login/i })
+
+    await user.type(emailInput, 'invalid-email')
+    await user.click(submitButton)
+
+    expect(screen.getByText('Invalid email address')).toBeInTheDocument()
+  })
+})
+```
+
+#### E2E Test Example
+```typescript
+import { test, expect } from '@playwright/test'
+
+test('user can register and login successfully', async ({ page }) => {
+  // Test implementation
+  await page.goto('/')
+
+  await page.click('text=Login')
+  await page.click('text=Register')
+
+  // Fill form and submit
+  await page.fill('input[placeholder="Enter your full name"]', 'Test User')
+  await page.fill('input[placeholder="Enter your email"]', 'test@example.com')
+  // ... more test steps
+
+  await page.click('button:has-text("Create Account")')
+  await page.waitForURL('**/dashboard')
+})
+```
+
+### Test Best Practices
+
+- **Unit Tests**: Focus on isolated functionality, mock external dependencies
+- **Integration Tests**: Test component interactions and API calls
+- **E2E Tests**: Cover complete user workflows, avoid over-testing implementation details
+- **Test Data**: Use realistic test data that covers edge cases
+- **Async Operations**: Properly handle promises and async/await
+- **Cleanup**: Clean up after tests, especially database operations
+
+### CI/CD Integration
+
+Tests are designed to run in CI/CD pipelines:
+- Unit tests run quickly and provide fast feedback
+- Integration tests require backend setup
+- E2E tests run against deployed environments
+
+### Debugging Tests
+
+#### Unit Tests
+```bash
+# Run specific test file
+npm test src/lib/__tests__/api.test.ts
+
+# Run with coverage
+npm test -- --coverage
+```
+
+#### E2E Tests
+```bash
+# Run specific test
+npx playwright test auth-flow.spec.ts
+
+# Run in debug mode
+npx playwright test --debug
+
+# Generate test report
+npx playwright show-report
+```
+
+### Mocking Strategy
+
+- **API Calls**: Mock fetch in unit tests using Vitest spies
+- **External Services**: Mock OpenAI API and other external dependencies
+- **Local Storage**: Mock browser APIs in component tests
+- **Database**: Use test database or mock database operations
+
+### Performance Considerations
+
+- **Unit Tests**: Should run in <5 seconds for fast feedback
+- **Integration Tests**: May take longer due to API calls
+- **E2E Tests**: Can be slow, run in parallel when possible
+- **Test Parallelization**: Configure Playwright to run tests in parallel
+
+### Future Test Improvements
+
+- **Visual Regression Testing**: Add visual comparison tests
+- **Performance Testing**: Add performance benchmarks
+- **Accessibility Testing**: Add a11y test coverage
+- **API Contract Testing**: Add API schema validation tests
+- **Load Testing**: Add stress testing for critical endpoints
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Please see our comprehensive [Contributing Guide](CONTRIBUTING.md) for detailed information on:
 
-### Development Guidelines
+- Development setup and workflow
+- Code standards and best practices
+- Testing guidelines
+- Pull request process
+- Project roadmap and priorities
 
-- Follow TypeScript best practices
-- Use ESLint configuration
-- Write meaningful commit messages
-- Add tests for new features
-- Update documentation as needed
+### Quick Start for Contributors
 
-### Code Style
+1. **Fork and Clone**
+   ```bash
+   git clone <your-fork-url>
+   cd agriconnect
+   npm install
+   ```
 
-- Use functional components with hooks
-- Follow React and TypeScript naming conventions
-- Use Tailwind CSS classes for styling
-- Keep components modular and reusable
+2. **Set up Development Environment**
+   ```bash
+   cp .env.example .env
+   npm run dev:all
+   ```
+
+3. **Run Tests**
+   ```bash
+   npm test              # Unit tests
+   npm run playwright:test  # E2E tests
+   ```
+
+4. **Create Feature Branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+For detailed contribution guidelines, please refer to [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
